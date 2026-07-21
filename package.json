@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "build": "node scripts/generate-site.mjs",
+    "dev": "node scripts/generate-site.mjs && python -m http.server 4173"
+  }
+}

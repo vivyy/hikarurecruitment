@@ -3,6 +3,7 @@ import { extname, dirname, join } from "node:path";
 
 const root = process.cwd();
 const locales = ["en", "it", "th", "ja"];
+const basePath = "/hikarurecruitment";
 const pages = locales.flatMap((locale) => [`${locale}/index.html`, `${locale}/privacy/index.html`]);
 const failures = [];
 
@@ -11,10 +12,10 @@ for (const locale of locales) {
   if (!html.includes(`<html lang="${locale}">`)) failures.push(`${locale}: missing html lang`);
   if (!html.includes(`name="website_language" value="${locale}"`)) failures.push(`${locale}: missing hidden language`);
   for (const code of locales) {
-    if (!html.includes(`hreflang="${code}" href="https://hidahikaru.com/${code}/"`)) failures.push(`${locale}: missing hreflang ${code}`);
-    if (!html.includes(`href="/${code}/"`)) failures.push(`${locale}: missing language link ${code}`);
+    if (!html.includes(`hreflang="${code}" href="https://vivyy.github.io/hikarurecruitment/${code}/"`)) failures.push(`${locale}: missing hreflang ${code}`);
+    if (!html.includes(`href="/hikarurecruitment/${code}/"`)) failures.push(`${locale}: missing language link ${code}`);
   }
-  if (!html.includes(`href="https://hidahikaru.com/${locale}/"`)) failures.push(`${locale}: missing canonical`);
+  if (!html.includes(`href="https://vivyy.github.io/hikarurecruitment/${locale}/"`)) failures.push(`${locale}: missing canonical`);
 }
 
 for (const page of pages) {
@@ -24,10 +25,11 @@ for (const page of pages) {
     if (raw.startsWith("http") || raw.startsWith("#") || raw.startsWith("mailto:") || raw.startsWith("tel:")) continue;
     const withoutHash = raw.split("#")[0];
     if (!withoutHash) continue;
-    let target = withoutHash.startsWith("/")
-      ? join(root, withoutHash)
-      : join(dirname(join(root, page)), withoutHash);
-    if (withoutHash.endsWith("/")) target = join(target, "index.html");
+    const normalized = withoutHash.startsWith(basePath) ? withoutHash.slice(basePath.length) || "/" : withoutHash;
+    let target = normalized.startsWith("/")
+      ? join(root, normalized)
+      : join(dirname(join(root, page)), normalized);
+    if (normalized.endsWith("/")) target = join(target, "index.html");
     if (!extname(target) && !existsSync(target)) target += ".html";
     if (!existsSync(target)) failures.push(`${page}: broken local link ${raw}`);
   }
